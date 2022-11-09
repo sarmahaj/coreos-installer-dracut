@@ -17,6 +17,7 @@ parent_device=/dev/$(basename "${parent_path}")
 
 growpart "${parent_device}" "${partition}" || true
 
+echo 'growpart executed on "${parent_device}" "${partition}" ' | systemd-cat -p info
 cryptsetup=0
 dm_name=""
 src=$(findmnt -nvr -o SOURCE "$path")
@@ -40,8 +41,12 @@ if [ "${cryptsetup}" -eq 1 ]; then
     echo $key | cryptsetup resize "${dm_name}" -
 fi
 
+echo "cryptsetup resize executed on "${dm_name}" " | systemd-cat -p info
+
 lvm pvresize /dev/mapper/${crypt}
 lvm vgchange -ay rootvg
+
+echo 'lvm performed' | systemd-cat -p info
 
 if [[ ! -e /dev/disk/by-label/root ]]; then
     dm=$(blkid --label root)
