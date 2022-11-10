@@ -17,36 +17,20 @@ parent_device=/dev/$(basename "${parent_path}")
 
 growpart "${parent_device}" "${partition}" || true
 
-echo 'growpart executed on "${parent_device}" "${partition}" ' | systemd-cat -p info
-cryptsetup=0
-dm_name=""
-src=$(findmnt -nvr -o SOURCE "$path")
-if [[ "${src}" =~ /dev/mapper ]]; then
-    dm_name=$(dmsetup info ${src} -C -o name --noheadings) || true
-    if [[ "$(dmsetup info ${dm_name} -C -o uuid --noheadings)" =~ "CRYPT-LUKS2" ]]; then
-        majmin=$(dmsetup table ${dm_name} | cut -d " " -f7)
-        cryptsetup=1
-    fi
+# echo "growpart executed on "${parent_device}" "${partition}"
+
+crypt=$(lsblk -ln -o NAME,TYPE | grep crypt | awk '{print $1}')
+
+if [[ -z ${crypt} ]]; then
+    exit 1
 fi
+cryptsetup resize ${crypt}
 
-if [ "${cryptsetup}" -eq 1 ]; then
-    id="$(cryptsetup luksDump "${parent_device}${partition}" | sed -rn 's|^\s+([0-9]+): clevis|\1|p')"
-    token=$(cryptsetup token export --token-id "${id}" "${parent_device}${partition}")
-    key=$(echo ${token} \
-        | jose fmt -j- -Og jwe -o- \
-        | jose jwe fmt -i- -c \
-        | tr -d '\n' \
-        | clevis decrypt)
-
-    echo $key | cryptsetup resize "${dm_name}" -
-fi
-
-echo "cryptsetup resize executed on "${dm_name}" " | systemd-cat -p info
+echo "cryptsetup resize executed on "${dm_name}" "
 
 lvm pvresize /dev/mapper/${crypt}
 lvm vgchange -ay rootvg
 
-echo 'lvm performed' | systemd-cat -p info
 
 if [[ ! -e /dev/disk/by-label/root ]]; then
     dm=$(blkid --label root)
@@ -55,3 +39,4 @@ if [[ ! -e /dev/disk/by-label/root ]]; then
     fi
     ln -s ${dm} /dev/disk/by-label/root
 fi
+
