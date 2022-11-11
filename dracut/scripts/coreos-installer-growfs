@@ -1,11 +1,11 @@
 #!/bin/bash
 
 set -euo pipefail
-
-path=/growroot
 udevadm settle
 
+path=/growroot
 mkdir -p ${path}
+echo "mount root device at /growroot \n" | systemd-cat
 mount -t xfs /dev/disk/by-label/root ${path}
 
 majmin=$(findmnt -nvr -o MAJ:MIN "$path")
@@ -17,7 +17,7 @@ parent_device=/dev/$(basename "${parent_path}")
 
 growpart "${parent_device}" "${partition}" || true
 
-# echo "growpart executed on "${parent_device}" "${partition}"
+echo "growpart executed on "${parent_device}" "${partition}" " | systemd-cat
 
 crypt=$(lsblk -ln -o NAME,TYPE | grep crypt | awk '{print $1}')
 
@@ -26,7 +26,7 @@ if [[ -z ${crypt} ]]; then
 fi
 cryptsetup resize ${crypt}
 
-echo "cryptsetup resize executed on "${dm_name}" "
+echo "cryptsetup resize executed on "${dm_name}" " | systemd-cat
 
 lvm pvresize /dev/mapper/${crypt}
 lvm vgchange -ay rootvg
