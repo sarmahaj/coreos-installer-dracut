@@ -4,11 +4,10 @@ set -euo pipefail
 udevadm settle
 
 path=/growroot
-mkdir -p ${path}
-echo "mount root device at /growroot \n" | systemd-cat
-mount -t xfs /dev/disk/by-label/root ${path}
 
-majmin=$(findmnt -nvr -o MAJ:MIN "$path")
+tmp_path=$(findmnt -o SOURCE / -rn)
+path_root=${tmp_path%[*}
+majmin=$(findmnt -nvr -o MAJ:MIN "$path_root")
 
 devpath=$(realpath "/sys/dev/block/$majmin")
 partition=$(cat "$devpath/partition")
@@ -25,7 +24,6 @@ if [[ -z ${crypt} ]]; then
     exit 1
 fi
 cryptsetup resize ${crypt}
-
 echo "cryptsetup resize executed on "${dm_name}" " | systemd-cat
 
 lvm pvresize /dev/mapper/${crypt}
@@ -39,4 +37,6 @@ if [[ ! -e /dev/disk/by-label/root ]]; then
     fi
     ln -s ${dm} /dev/disk/by-label/root
 fi
-
+echo "mount root device at /growroot \n" | systemd-cat
+mkdir -p ${path}
+mount -t xfs /dev/disk/by-label/root ${path}
