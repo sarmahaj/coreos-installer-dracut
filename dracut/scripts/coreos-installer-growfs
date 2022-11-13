@@ -23,7 +23,7 @@ echo $blkid_output
 
 #growpart "${parent_device}" "${partition}" || true
 
-#echo "growpart executed on "${parent_device}" "${partition}" " | systemd-cat
+#echo "growpart executed on "${parent_device}" "${partition}" " 
 
 crypt=$(lsblk -ln -o NAME,TYPE | grep crypt | awk '{print $1}')
 
@@ -31,7 +31,7 @@ if [[ -z ${crypt} ]]; then
     exit 1
 fi
 cryptsetup resize ${crypt}
-echo "cryptsetup resize executed on "${crypt}" " | systemd-cat
+echo "cryptsetup resize executed on "${crypt}" "
 
 lvm pvresize /dev/mapper/${crypt}
 lvm vgchange -ay rootvg
@@ -44,6 +44,6 @@ if [[ ! -e /dev/disk/by-label/root ]]; then
     fi
     ln -s ${dm} /dev/disk/by-label/root
 fi
-echo "mount root device at /growroot \n" | systemd-cat
+echo "mount root device at /growroot \n" 
 mkdir -p ${path}
 mount -t xfs /dev/disk/by-label/root ${path}
