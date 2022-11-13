@@ -3,10 +3,14 @@
 set -euo pipefail
 udevadm settle
 
-#path=/growroot
+path=/growroot
 
-#lsblk_output=$(lsblk)
-#findmnt_output=$(findmnt)
+lsblk_output=$(lsblk)
+findmnt_output=$(findmnt)
+blkid_output=$(blkid)
+echo $lsblk_output
+echo $findmnt_output
+echo $blkid_output
 
 #tmp_path=$(findmnt -o SOURCE / -rn)
 #path_root=${tmp_path%[*}
