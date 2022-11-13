@@ -3,20 +3,23 @@
 set -euo pipefail
 udevadm settle
 
-path=/growroot
+#path=/growroot
 
-tmp_path=$(findmnt -o SOURCE / -rn)
-path_root=${tmp_path%[*}
-majmin=$(findmnt -nvr -o MAJ:MIN "$path_root")
+#lsblk_output=$(lsblk)
+#findmnt_output=$(findmnt)
 
-devpath=$(realpath "/sys/dev/block/$majmin")
-partition=$(cat "$devpath/partition")
-parent_path=$(dirname "$devpath")
-parent_device=/dev/$(basename "${parent_path}")
+#tmp_path=$(findmnt -o SOURCE / -rn)
+#path_root=${tmp_path%[*}
+#majmin=$(findmnt -nvr -o MAJ:MIN "$path_root")
 
-growpart "${parent_device}" "${partition}" || true
+#devpath=$(realpath "/sys/dev/block/$majmin")
+#partition=$(cat "$devpath/partition")
+#parent_path=$(dirname "$devpath")
+#parent_device=/dev/$(basename "${parent_path}")
 
-echo "growpart executed on "${parent_device}" "${partition}" " | systemd-cat
+#growpart "${parent_device}" "${partition}" || true
+
+#echo "growpart executed on "${parent_device}" "${partition}" " | systemd-cat
 
 crypt=$(lsblk -ln -o NAME,TYPE | grep crypt | awk '{print $1}')
 
@@ -24,7 +27,7 @@ if [[ -z ${crypt} ]]; then
     exit 1
 fi
 cryptsetup resize ${crypt}
-echo "cryptsetup resize executed on "${dm_name}" " | systemd-cat
+echo "cryptsetup resize executed on "${crypt}" " | systemd-cat
 
 lvm pvresize /dev/mapper/${crypt}
 lvm vgchange -ay rootvg
