@@ -62,6 +62,7 @@ if [ "${device##*/}" = "${device}" ]; then
     # karg contains no slashes.  Prepend "/dev/" for compatibility.
     device="/dev/${device}"
 fi
+export installation_device=$device
 args+=("${device}")
 
 # Forward whitelisted kernel arguments to the installed system. We have

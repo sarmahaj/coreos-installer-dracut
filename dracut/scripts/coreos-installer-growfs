@@ -21,9 +21,12 @@ echo $blkid_output
 
 #growpart "${parent_device}" "${partition}" || true
 
-installation_device=/dev/vda
-partition=$(grep -c 'vda[0-9]' /proc/partitions)
-growpart installation_device partition
+
+
+device=${installation_device##*/}
+partition=$(grep -c "${device}"[0-9] /proc/partitions)
+echo "installation device: $installation_device and partition $partition"
+growpart $installation_device $partition
 echo "growpart executed on "$installation_device" "$partition" " 
 
 crypt=$(lsblk -ln -o NAME,TYPE | grep crypt | awk '{print $1}')
