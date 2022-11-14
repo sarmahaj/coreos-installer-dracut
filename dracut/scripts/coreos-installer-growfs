@@ -1,14 +1,7 @@
-#!/bin/bash
+#!/bin/bash -p
 
 set -euo pipefail
 udevadm settle
-
-lsblk_output=$(lsblk)
-findmnt_output=$(findmnt)
-blkid_output=$(blkid)
-echo $lsblk_output
-echo $findmnt_output
-echo $blkid_output
 
 #tmp_path=$(findmnt -o SOURCE / -rn)
 #path_root=${tmp_path%[*}
@@ -21,8 +14,9 @@ echo $blkid_output
 
 #growpart "${parent_device}" "${partition}" || true
 
+echo "installation_device test export: $installation_device"
 
-
+installation_device="/dev/vda"
 device=${installation_device##*/}
 partition=$(grep -c "${device}"[0-9] /proc/partitions)
 echo "installation device: $installation_device and partition $partition"
