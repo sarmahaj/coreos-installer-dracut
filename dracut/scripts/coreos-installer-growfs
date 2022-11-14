@@ -14,9 +14,9 @@ udevadm settle
 
 #growpart "${parent_device}" "${partition}" || true
 
-echo "installation_device test export: $installation_device"
+#echo "installation_device test export: $installation_device"
 
-installation_device="/dev/vda"
+installation_device="${coreos.inst.install_dev}"
 device=${installation_device##*/}
 partition=$(grep -c "${device}"[0-9] /proc/partitions)
 echo "installation device: $installation_device and partition $partition"
