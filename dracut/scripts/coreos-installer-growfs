@@ -21,7 +21,10 @@ echo $blkid_output
 
 #growpart "${parent_device}" "${partition}" || true
 
-#echo "growpart executed on "${parent_device}" "${partition}" " 
+installation_device=/dev/vda
+partition=$(grep -c 'vda[0-9]' /proc/partitions)
+growpart installation_device partition
+echo "growpart executed on "$installation_device" "$partition" " 
 
 crypt=$(lsblk -ln -o NAME,TYPE | grep crypt | awk '{print $1}')
 
@@ -44,17 +47,23 @@ if [[ ! -e /dev/disk/by-label/root ]]; then
 fi
 echo "mount root device at /growroot \n" 
 
+
 path_root=/growroot
-mkdir -o ${path_root}
+mkdir -p ${path_root}
 mount -t xfs /dev/disk/by-label/root ${path_root}
 
 
-path_crypt=/grow_cryptroot
-mkdir -p ${path_crypt}
-device=$(blkid --label crypt_root)
-echo $device
-partition=$(cat "/sys/block/vda/vda4/partition")
-growpart /dev/vda 4
+# path_crypt=/grow_cryptroot
+# mkdir -p ${path_crypt}
+# device=$(blkid --label crypt_root)
+# echo $device
+# partition=$(cat "/sys/block/vda/vda4/partition")
+# growpart /dev/vda 4
+
+
+# get devic through coreos.inst
+
+#lvextend +100%FREE (lvs- path of lv)
 #tmp_path=$(findmnt -o SOURCE $path -rn)
 #path_root=${tmp_path%[*}
 #majmin=$(findmnt -nvr -o MAJ:MIN "$path")
