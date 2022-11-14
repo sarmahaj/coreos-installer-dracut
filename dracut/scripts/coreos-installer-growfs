@@ -3,8 +3,6 @@
 set -euo pipefail
 udevadm settle
 
-path=/growroot
-
 lsblk_output=$(lsblk)
 findmnt_output=$(findmnt)
 blkid_output=$(blkid)
@@ -45,5 +43,24 @@ if [[ ! -e /dev/disk/by-label/root ]]; then
     ln -s ${dm} /dev/disk/by-label/root
 fi
 echo "mount root device at /growroot \n" 
-mkdir -p ${path}
-mount -t xfs /dev/disk/by-label/root ${path}
+
+path_root=/growroot
+mkdir -o ${path_root}
+mount -t xfs /dev/disk/by-label/root ${path_root}
+
+
+path_crypt=/grow_cryptroot
+mkdir -p ${path_crypt}
+device=$(blkid --label crypt_root)
+echo $device
+partition=$(cat "/sys/block/vda/vda4/partition")
+growpart /dev/vda 4
+#tmp_path=$(findmnt -o SOURCE $path -rn)
+#path_root=${tmp_path%[*}
+#majmin=$(findmnt -nvr -o MAJ:MIN "$path")
+
+#devpath=$(realpath "/sys/dev/block/$majmin")
+#partition=$(cat "$devpath/partition")
+#parent_path=$(dirname "$devpath")
+#parent_device=/dev/$(basename "${parent_path}")
+#growpart "${parent_device}" "${partition}" || true
