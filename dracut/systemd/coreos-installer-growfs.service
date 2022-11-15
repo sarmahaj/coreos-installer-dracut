@@ -9,7 +9,6 @@ Requires=dev-disk-by\x2dlabel-root.device
 ConditionKernelCommandLine=coreos.inst.install_dev
 
 [Service]
-Environment=coreos.inst.install_dev
 Type=oneshot
 ExecStart=/usr/libexec/coreos-installer-growfs
 RemainAfterExit=yes

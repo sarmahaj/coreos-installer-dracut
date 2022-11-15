@@ -3,23 +3,30 @@
 set -euo pipefail
 udevadm settle
 
-#tmp_path=$(findmnt -o SOURCE / -rn)
-#path_root=${tmp_path%[*}
-#majmin=$(findmnt -nvr -o MAJ:MIN "$path_root")
+args=("install")
+cmdline=( $(</proc/cmdline) )
 
-#devpath=$(realpath "/sys/dev/block/$majmin")
-#partition=$(cat "$devpath/partition")
-#parent_path=$(dirname "$devpath")
-#parent_device=/dev/$(basename "${parent_path}")
-
-#growpart "${parent_device}" "${partition}" || true
+karg() {
+    local name="$1" value=""
+    for arg in "${cmdline[@]}"; do
+        if [[ "${arg%%=*}" == "${name}" ]]; then
+            value="${arg#*=}"
+        fi
+    done
+    echo "${value}"
+}
 
 #echo "installation_device test export: $installation_device"
+# Get install device
+device="$(karg coreos.inst.install_dev)"
+if [ "${device##*/}" = "${device}" ]; then
+    # karg contains no slashes.  Prepend "/dev/" for compatibility.
+    device="/dev/${device}"
+fi
 
-installation_device="${coreos.inst.install_dev}"
-device=${installation_device##*/}
-partition=$(grep -c "${device}"[0-9] /proc/partitions)
-echo "installation device: $installation_device and partition $partition"
+dev=${device##*/}
+partition=$(grep -c "${dev}"[0-9] /proc/partitions)
+echo "installation device: $device and partition $partition"
 growpart $installation_device $partition
 echo "growpart executed on "$installation_device" "$partition" " 
 
@@ -69,4 +76,18 @@ mount -t xfs /dev/disk/by-label/root ${path_root}
 #partition=$(cat "$devpath/partition")
 #parent_path=$(dirname "$devpath")
 #parent_device=/dev/$(basename "${parent_path}")
+#growpart "${parent_device}" "${partition}" || true
+
+
+
+#for my ref
+#tmp_path=$(findmnt -o SOURCE / -rn)
+#path_root=${tmp_path%[*}
+#majmin=$(findmnt -nvr -o MAJ:MIN "$path_root")
+
+#devpath=$(realpath "/sys/dev/block/$majmin")
+#partition=$(cat "$devpath/partition")
+#parent_path=$(dirname "$devpath")
+#parent_device=/dev/$(basename "${parent_path}")
+
 #growpart "${parent_device}" "${partition}" || true
