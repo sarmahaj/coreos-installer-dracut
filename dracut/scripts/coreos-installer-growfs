@@ -18,15 +18,15 @@ karg() {
 
 #echo "installation_device test export: $installation_device"
 # Get install device
-device="$(karg coreos.inst.install_dev)"
-if [ "${device##*/}" = "${device}" ]; then
+installation_device="$(karg coreos.inst.install_dev)"
+if [ "${installation_device##*/}" = "${installation_device}" ]; then
     # karg contains no slashes.  Prepend "/dev/" for compatibility.
-    device="/dev/${device}"
+    installation_device="/dev/${installation_device}"
 fi
 
-dev=${device##*/}
-partition=$(grep -c "${dev}"[0-9] /proc/partitions)
-echo "installation device: $device and partition $partition"
+device=${installation_device##*/}
+partition=$(grep -c "${device}"[0-9] /proc/partitions)
+echo "installation device: $installation_device and partition $partition"
 growpart $installation_device $partition
 echo "growpart executed on "$installation_device" "$partition" " 
 
